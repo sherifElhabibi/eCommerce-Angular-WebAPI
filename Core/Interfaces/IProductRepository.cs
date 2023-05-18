@@ -1,4 +1,5 @@
-﻿using eCommerce.Entities;
+﻿using Core.Entities;
+using eCommerce.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,10 @@ namespace Core.Interfaces
 {
     public interface IProductRepository
     {
-        Task<List<Product>> GetProductsAsync();
+        Task<IEnumerable<Product>> GetProductsAsync();
         Task<Product> GetProductAsync(int id);
+        Task<IEnumerable<ProductBrand>> GetProductBrandsAsync();
+        Task<IEnumerable<ProductType>> GetProductTypesAsync();
+
     }
 }

@@ -1,12 +1,10 @@
-
-//using eCommerce.Data;
 using Core.Interfaces;
-using eCommerce.Data.DbInitializer;
 using Infrastructure.Data;
+using Infrastrucure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Threading.Tasks;
+
+
 
 namespace eCommerce
 {
@@ -22,6 +20,7 @@ namespace eCommerce
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IProductRepository,ProductRepository>();
             builder.Services.AddDbContext<StoreContext>(options =>
             {
@@ -50,18 +49,18 @@ namespace eCommerce
             app.MapControllers();
 
             using var scope = app.Services.CreateScope();
-            var Services = scope.ServiceProvider;
-            var context = Services.GetRequiredService<StoreContext>();
-            var logger = Services.GetRequiredService<ILogger<Program>>();
+            var services = scope.ServiceProvider;
+            var context = services.GetRequiredService<StoreContext>();
+            var logger = services.GetRequiredService<ILogger<Program>>();
 
             try
             {
-                 await context.Database.MigrateAsync();
-                 await StoreContextInitializer.SeedAsync(context);
+                await context.Database.MigrateAsync();
+                await StoreContextSeed.SeedAsync(context);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error While Migrating");
+                logger.LogError(ex, "Error while migrating or seeding the database.");
             }
 
             app.Run();
