@@ -1,4 +1,5 @@
 using Core.Interfaces;
+using eCommerce.Middleware;
 using Infrastructure.Data;
 using Infrastrucure.Data;
 using Microsoft.AspNetCore.Builder;
@@ -24,6 +25,16 @@ namespace eCommerce
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IProductRepository,ProductRepository>();
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("MyAllowSpecificOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
+                });
+            });
             builder.Services.AddDbContext<StoreContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -43,9 +54,15 @@ namespace eCommerce
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+
+            app.UseCors("MyAllowSpecificOrigins");
 
             app.UseAuthorization();
 
